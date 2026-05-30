@@ -1,1 +1,0 @@
-# oosaka-map-app
