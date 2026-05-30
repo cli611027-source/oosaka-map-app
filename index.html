@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>大阪交通導覽地圖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 60vh; width: 100%; border-radius: 8px; }
+        #info { margin-top: 20px; padding: 20px; background: #eef6ff; border-radius: 8px; border: 1px solid #b3d7ff; }
+        .nav-btn { display: inline-block; margin-top: 10px; padding: 12px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>大阪大眾運輸導航地圖</h2>
+    <p>1. 點擊地圖上的「起點」<br>2. 點擊地圖上的「終點」<br>3. 點擊下方出現的導航按鈕</p>
+    <div id="map"></div>
+    <div id="info">請選擇起點與終點...</div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([34.6937, 135.5023], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const locations = [
+            { name: "梅田站", lat: 34.7025, lng: 135.4952 },
+            { name: "難波站", lat: 34.6666, lng: 135.5002 },
+            { name: "大阪城", lat: 34.6873, lng: 135.5262 },
+            { name: "道頓堀", lat: 34.6687, lng: 135.5013 },
+            { name: "大阪海遊館", lat: 34.6545, lng: 135.4290 }
+            // 您可以在此處繼續添加更多地點
+        ];
+
+        let selected = [];
+        locations.forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            marker.bindPopup(loc.name);
+            marker.on('click', () => {
+                selected.push(loc);
+                if (selected.length > 2) selected = [loc];
+                
+                if (selected.length === 2) {
+                    const p1 = selected[0];
+                    const p2 = selected[1];
+                    // 關鍵：這串網址會觸發 Google Maps 的大眾運輸導航 (transit)
+                    const url = `https://www.google.com/maps/dir/?api=1&origin=${p1.lat},${p1.lng}&destination=${p2.lat},${p2.lng}&travelmode=transit`;
+                    document.getElementById('info').innerHTML = `
+                        從 <b>${p1.name}</b> 到 <b>${p2.name}</b><br>
+                        <a href="${url}" target="_blank" class="nav-btn">開啟 Google Maps 大眾運輸導航</a>
+                    `;
+                } else {
+                    document.getElementById('info').innerHTML = `已選起點：${loc.name}，請點擊終點。`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
